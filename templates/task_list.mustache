@@ -1,0 +1,19 @@
+<div class="taskporter-container">
+    {{#has_assignments}}
+        <h3>Assignments in this course:</h3>
+        <ul class="assignment-list">
+            {{#assignments}}
+                <li>
+                    <a href="{{url}}">{{name}}</a>
+                    <div>Due: {{duedateformatted}}</div>
+                </li>
+            {{/assignments}}
+        </ul>
+        <div class="mt-4">
+            <a href="{{calendar_url}}" class="btn btn-primary">Add All Tasks to Calendar</a>
+        </div>
+    {{/has_assignments}}
+    {{^has_assignments}}
+        <p>No assignments found for this course.</p>
+    {{/has_assignments}}
+</div>

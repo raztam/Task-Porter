@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/taskporter/db" VERSION="20240301" COMMENT="XMLDB file for TaskPorter plugin"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_taskporter_oauth_state" COMMENT="Stores OAuth state information for TaskPorter">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User ID"/>
+        <FIELD NAME="state" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth state token"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when the state was created"/>
+        <FIELD NAME="timeexpired" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when the state expires"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="state" UNIQUE="true" FIELDS="state"/>
+      </INDEXES>
+
+    </TABLE>
+    <TABLE NAME="local_taskporter_user_tokens" COMMENT="Stores user access tokens for TaskPorter">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User ID"/>
+        <FIELD NAME="access_token" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth access token"/>
+        <FIELD NAME="refresh_token" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth refresh token"/>
+        <FIELD NAME="expires_at" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp when the token expires"/>
+        <FIELD NAME="scope" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth granted scopes"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth provider name (e.g., microsoft, google)"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when the token was created"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when the token was last modified"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid_provider" UNIQUE="true" FIELDS="userid, provider" COMMENT="Each user can have only one token per provider"/>
+      </INDEXES>
+    </TABLE>
+    
+  </TABLES>
+</XMLDB>
