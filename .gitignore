@@ -1,4 +1,6 @@
-/local/TaskPorter/config.php
+/local/taskporter/config.php
+/config.php
+
 
 /vendor/
 /node_modules/

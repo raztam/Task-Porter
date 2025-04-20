@@ -64,13 +64,13 @@ class google_auth_manager {
         // Get client credentials from plugin settings.
         $clientid = $googleapiconfig['google_client_id'];
         $clientsecret = $googleapiconfig['google_client_secret'];
-        $redirecturi = 'http://localhost:8888/moodle404/local/taskporter/google_oauth_callback.php';
+        $redirecturi = (new \moodle_url('/local/taskporter/google_oauth_callback.php'))->out(false);
 
         $this->client->setClientId($clientid);
         $this->client->setClientSecret($clientsecret);
         $this->client->setRedirectUri( $redirecturi);
-        $this->client->setAccessType('offline');  // We need refresh token
-        $this->client->setPrompt('consent');      // Force to approve the access each time
+        $this->client->setAccessType('offline');  // We need refresh token.
+        $this->client->setPrompt('consent');      // Force to approve the access each time.
 
         // Try to load saved token.
         $token = $this->get_stored_token();
@@ -89,7 +89,10 @@ class google_auth_manager {
      *
      * @return string The authorization URL
      */
-    public function get_auth_url() {
+    public function get_auth_url($state=[]) {
+        if (!empty($state)) {
+            $this->client->setState(json_encode($state));
+        }
         return $this->client->createAuthUrl();
     }
 
@@ -101,9 +104,13 @@ class google_auth_manager {
     public function get_stored_token() {
         global $DB;
 
-        $record = $DB->get_record('local_taskporter_user_tokens', ['userid' => $this->userid]);
-        if ($record && !empty($record->token)) {
-            return json_decode($record->token, true);
+        $record = $DB->get_record('local_taskporter_user_tokens', [
+            'userid' => $this->userid,
+            'provider' => 'google',
+        ]);
+
+        if ($record && !empty($record->token_data)) {
+            return json_decode($record->token_data, true);
         }
 
         return null;
@@ -160,21 +167,40 @@ class google_auth_manager {
      * @return bool True if successful
      */
     protected function save_token($token) {
-        global $DB, $USER;
+        global $DB;
 
-        $record = $DB->get_record('local_taskporter_user_tokens', ['userid' => $this->userid]);
+        try {
+            $record = $DB->get_record('local_taskporter_user_tokens', [
+                'userid' => $this->userid,
+                'provider' => 'google',
+            ]);
 
-        if ($record) {
-            $record->token = json_encode($token);
-            $record->timemodified = time();
-            return $DB->update_record('local_taskporter_user_tokens', $record);
-        } else {
-            $record = new \stdClass();
-            $record->userid = $this->userid;
-            $record->token = json_encode($token);
-            $record->timecreated = time();
-            $record->timemodified = time();
-            return $DB->insert_record('local_taskporter_user_tokens', $record) > 0;
+            if ($record) {
+                // When refreshing tokens, Google typically doesn't send a new refresh token
+                // We need to preserve the existing one if a new one isn't included
+                if (empty($token['refresh_token'])) {
+                    $existingToken = json_decode($record->token_data, true);
+                    if (!empty($existingToken['refresh_token'])) {
+                        $token['refresh_token'] = $existingToken['refresh_token'];
+                    }
+                }
+
+                $record->token_data = json_encode($token);
+                $record->timemodified = time();
+                return $DB->update_record('local_taskporter_user_tokens', $record);
+            } else {
+                // First time authentication - store everything
+                $record = new \stdClass();
+                $record->userid = $this->userid;
+                $record->token_data = json_encode($token);
+                $record->provider = 'google';
+                $record->timecreated = time();
+                $record->timemodified = time();
+                return $DB->insert_record('local_taskporter_user_tokens', $record) > 0;
+            }
+        } catch (\Exception $e) {
+            debugging('Error saving Google token: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return false;
         }
     }
 
@@ -228,11 +254,22 @@ class google_auth_manager {
     }
 
     /**
- * Get the redirect URI that's configured for OAuth
+    * Get the redirect URI that's configured for OAuth
+    *
+    * @return string The configured redirect URI
+    */
+    public function get_redirect_uri() {
+        return $this->client->getRedirectUri();
+    }
+
+/**
+ * Handle OAuth callback and exchange code for access token.
  *
- * @return string The configured redirect URI
+ * @param string $code Authorization code from Google
+ * @return bool True if successful
  */
-public function get_redirect_uri() {
-    return $this->client->getRedirectUri();
+public function handle_callback($code) {
+    return $this->store_token_from_code($code);
 }
+
 }

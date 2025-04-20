@@ -2,7 +2,7 @@
 use local_taskporter\controller\task_controller;
 
 require_once('../../config.php');
-require_once($CFG->dirroot . '/local/TaskPorter/classes/task_controller.php');
+require_once($CFG->dirroot . '/local/taskporter/classes/task_controller.php');
 require_login();
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -26,7 +26,7 @@ $assignments = json_decode($assignmentsjson, true);
 $templatedata = [
     'has_assignments' => !empty($assignments),
     'assignments' => $assignments,
-    'calendar_url' => (new moodle_url('/local/taskporter/google_auth.php', ['courseid' => $courseid]))->out(false),
+    'calendar_url' => (new moodle_url('/local/taskporter/add_to_calendar.php', ['courseid' => $courseid]))->out(false),
 ];
 
 echo $OUTPUT->header();

@@ -26,28 +26,33 @@ require_once('../../config.php');
 require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
 
 $courseid = required_param('courseid', PARAM_INT);
+// Optional parameter to determine where to redirect after authentication
+$returnto = optional_param('returnto', 'default', PARAM_ALPHA);
+
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login();
 require_capability('local/taskporter:view', $context);
 
-// Create instance of the Google Auth Manager
+// Create instance of the Google Auth Manager.
 $authmanager = new \local_taskporter\google\google_auth_manager();
+
+if ($authmanager->is_authenticated()) {
+    // If already authenticated, redirect based on the returnto parameter.
+    if ($returnto === 'calendar') {
+        redirect(new moodle_url('/local/taskporter/add_to_calendar.php', array('courseid' => $courseid)));
+    }
+}
 
 $authmanager->get_redirect_uri();
 
-// Check if we're returning from Google with a code
-if (isset($_GET['code'])) {
-    // Exchange code for tokens
-    $authmanager->handle_oauth_callback();
+// Not authenticated, start the OAuth flow by redirecting to Google.
+$state = [
+    'courseid' => $courseid,
+    'returnto' => $returnto,
+];
+$authurl = $authmanager->get_auth_url($state);
 
-    // If successful, redirect to the data display page
-    redirect(new moodle_url('/local/taskporter/show_google_data.php', array('courseid' => $courseid)));
-} else {
-    // If not returning from Google, initiate auth flow
-    $authurl = $authmanager->get_auth_url();
-
-    // Redirect user to Google for authentication
-    redirect($authurl);
-}
+// Redirect user to Google for authentication.
+redirect($authurl);

@@ -1,57 +1,54 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Handle callback from Google OAuth.
+ *
+ * @package    local_taskporter
+ * @copyright  2023 Your Name <your.email@example.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once('../../config.php');
 require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
 
+$code = required_param('code', PARAM_RAW);
+$state = required_param('state', PARAM_RAW);
+
+// Decode the state parameter from JSON.
+$state = json_decode($state, true);
+$courseid = $state['courseid'];
+$returnto = isset($state['returnto']) ? $state['returnto'] : 'default';
+
+$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$context = context_course::instance($courseid);
+
 require_login();
+require_capability('local/taskporter:view', $context);
 
-$code = optional_param('code', '', PARAM_RAW);
-$error = optional_param('error', '', PARAM_RAW);
-$state = optional_param('state', '', PARAM_RAW);
-
-// Extract courseid from state.
-$courseid = 0;
-if (!empty($state) && is_numeric($state)) {
-    $courseid = (int)$state;
-}
-
-// Create auth manager
+// Create instance of the Google Auth Manager.
 $authmanager = new \local_taskporter\google\google_auth_manager();
 
-// Check for errors
-if (!empty($error)) {
-    redirect(
-        new moodle_url('/local/taskporter/index.php', ['courseid' => $courseid]),
-        'Authentication failed: ' . $error,
-        null,
-        \core\output\notification::NOTIFY_ERROR
-    );
-}
+// Exchange the authorization code for an access token.
+$authmanager->handle_callback($code);
 
-// Process the authorization code
-if (!empty($code)) {
-    $success = $authmanager->store_token_from_code($code);
-
-    if ($success) {
-        // Redirect to test page to show the results
-        redirect(
-            new moodle_url('/local/taskporter/show_google_data.php', ['courseid' => $courseid]),
-            'Authentication successful!',
-            null,
-            \core\output\notification::NOTIFY_SUCCESS
-        );
-    } else {
-        redirect(
-            new moodle_url('/local/taskporter/index.php', ['courseid' => $courseid]),
-            'Failed to store authentication token.',
-            null,
-            \core\output\notification::NOTIFY_ERROR
-        );
-    }
+// Redirect based on the returnto parameter
+if ($returnto === 'calendar') {
+    redirect(new moodle_url('/local/taskporter/add_to_calendar.php', array('courseid' => $courseid)));
 } else {
-    redirect(
-        new moodle_url('/local/taskporter/index.php', ['courseid' => $courseid]),
-        'No authentication code received.',
-        null,
-        \core\output\notification::NOTIFY_ERROR
-    );
+    // Default fallback
+    redirect(new moodle_url('/local/taskporter/index.php', array('courseid' => $courseid)));
 }

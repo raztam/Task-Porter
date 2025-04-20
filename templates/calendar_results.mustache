@@ -1,0 +1,51 @@
+
+
+{{#success}}
+    <div class="alert alert-success">
+        Successfully added {{added}} tasks to your Google Calendar.
+    </div>
+
+    {{#failed}}
+        <div class="alert alert-warning">
+            Failed to add {{failed}} tasks.
+        </div>
+    {{/failed}}
+
+    <div class="card mt-3 mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Tasks Added to Calendar</h5>
+            <ul class="list-group list-group-flush">
+                {{#events}}
+                    <li class="list-group-item">
+                        {{#success}}
+                            <i class="fa fa-check text-success mr-2"></i>
+                            {{taskName}}
+                            {{#htmlLink}}
+                                <a href="{{htmlLink}}" target="_blank">
+                                    <i class="fa fa-external-link"></i> View in Calendar
+                                </a>
+                            {{/htmlLink}}
+                        {{/success}}
+                        {{^success}}
+                            <i class="fa fa-times text-danger mr-2"></i>
+                            {{taskName}}
+                            <small class="text-muted">Failed to add</small>
+                        {{/success}}
+                    </li>
+                {{/events}}
+            </ul>
+        </div>
+    </div>
+{{/success}}
+
+{{^success}}
+    <div class="alert alert-danger">
+        Failed to add tasks to calendar: {{message}}
+    </div>
+{{/success}}
+
+<div class="mt-3">
+    <a href="{{{courseUrl}}}" class="btn btn-secondary">
+        <i class="fa fa-arrow-left"></i> Back to Tasks
+    </a>
+</div>

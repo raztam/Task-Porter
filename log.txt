@@ -1,0 +1,18 @@
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task דוגמאות לפתרונות טכניים ברובוטיקה
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task הצגת פתרון לבעיה טכנית ספציפית
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task ניתוח פתרונות טכניים לבעיות ברובוטיקה
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task הצגת פתרונות לבעיות טכניות ברובוטיקה
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task <div class="subject-color-block">🟪</div>כתיבת עבודה -   ניתוח מקרה של פתרון בעיה ברובוטיקה
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task 🟧כתיבת הסבר -   תהליך הניתוח של רכיבי הרובוט
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task 🟫פעילות ניתוח במרכז הסימולציה -   ניתוח תפקוד הרובוט בהתבסס על רכיביו השונים
+[2025-04-14 05:05:16] Cannot add task to calendar: No due date for task 🟫כתיבת אלגוריתמים -   פיתוח אלגוריתמים המייצגים את האינטראקציה בין רכיבי הרובוט
+[2025-04-14 05:05:16] Task already exists in calendar: מטלה להגשה (jcodo36t5s0jj66ruopqsqicp0)
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task דוגמאות לפתרונות טכניים ברובוטיקה
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task הצגת פתרון לבעיה טכנית ספציפית
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task ניתוח פתרונות טכניים לבעיות ברובוטיקה
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task הצגת פתרונות לבעיות טכניות ברובוטיקה
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task <div class="subject-color-block">🟪</div>כתיבת עבודה -   ניתוח מקרה של פתרון בעיה ברובוטיקה
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task 🟧כתיבת הסבר -   תהליך הניתוח של רכיבי הרובוט
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task 🟫פעילות ניתוח במרכז הסימולציה -   ניתוח תפקוד הרובוט בהתבסס על רכיביו השונים
+[2025-04-14 05:05:36] Cannot add task to calendar: No due date for task 🟫כתיבת אלגוריתמים -   פיתוח אלגוריתמים המייצגים את האינטראקציה בין רכיבי הרובוט
+[2025-04-14 05:05:36] Task already exists in calendar: מטלה להגשה (jcodo36t5s0jj66ruopqsqicp0)
