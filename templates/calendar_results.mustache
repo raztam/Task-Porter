@@ -1,9 +1,13 @@
-
-
 {{#success}}
     <div class="alert alert-success">
         Successfully added {{added}} tasks to your Google Calendar.
     </div>
+
+    {{#skipped}}
+        <div class="alert alert-info">
+            {{skipped}} tasks were already in your calendar.
+        </div>
+    {{/skipped}}
 
     {{#failed}}
         <div class="alert alert-warning">
@@ -18,10 +22,17 @@
                 {{#events}}
                     <li class="list-group-item">
                         {{#success}}
-                            <i class="fa fa-check text-success mr-2"></i>
-                            {{taskName}}
+                            {{#alreadyExists}}
+                                <i class="fa fa-info-circle text-info mr-2"></i>
+                                {{taskName}}
+                                <small class="text-muted">Already exists in your calendar</small>
+                            {{/alreadyExists}}
+                            {{^alreadyExists}}
+                                <i class="fa fa-check text-success mr-2"></i>
+                                {{taskName}}
+                            {{/alreadyExists}}
                             {{#htmlLink}}
-                                <a href="{{htmlLink}}" target="_blank">
+                                <a href="{{htmlLink}}" target="_blank" class="ml-2">
                                     <i class="fa fa-external-link"></i> View in Calendar
                                 </a>
                             {{/htmlLink}}

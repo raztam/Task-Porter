@@ -25,7 +25,6 @@
 namespace local_taskporter\google;
 
 defined('MOODLE_INTERNAL') || die();
-require_once(dirname(dirname(__FILE__)) . '/write_logs.php');
 
 /**
  * Class responsible for handling Google Calendar API interactions
@@ -91,10 +90,10 @@ class google_calendar_handler {
                 return false;
             }
 
-             // Check if task already exists in calendar
+             // Check if task already exists in calendar.
             $existingevent = $this->find_existing_task($task);
             if ($existingevent) {
-                Debugging('Task already exists in calendar: ' . $task['name'] . ' (' . $existingevent->getId() . ')');
+                debugging('Task already exists in calendar: ' . $task['name'] . ' (' . $existingevent->getId() . ')');
                 return [
                  'id' => $existingevent->getId(),
                     'htmlLink' => $existingevent->getHtmlLink(),
@@ -104,12 +103,14 @@ class google_calendar_handler {
                 ];
             }
 
-            // Create an event
+            // Create an event.
             $event = $this->create_event_from_task($task, $duedate);
 
-            // Insert the event
+            // Insert the event.
             $createdevent = $this->calendarservice->events->insert($this->calendarid, $event);
-            // Return the created event
+
+            echo 'Event created: ' . print_r( $createdevent, true) . "\n";
+            // Return the created event.
             return [
                 'id' => $createdevent->getId(),
                 'htmlLink' => $createdevent->getHtmlLink(),
@@ -134,6 +135,7 @@ class google_calendar_handler {
             'success' => true,
             'total' => count($tasks),
             'added' => 0,
+            'skipped' => 0,
             'failed' => 0,
             'events' => [],
         ];
@@ -154,14 +156,26 @@ class google_calendar_handler {
             $event = $this->add_task_to_calendar($task);
 
             if ($event) {
-                $results['added']++;
-                $results['events'][] = $event;
+                if (!empty($event['alreadyExists'])) {
+                    // Task already exists in calendar.
+                    $results['skipped']++;
+                    $results['events'][] = [
+                        'taskName' => $task['name'],
+                        'success' => true,
+                        'message' => 'Task already exists in calendar',
+                        'id' => $event['id'],
+                        'htmlLink' => $event['htmlLink'],
+                    ];
+                } else {
+                    $results['added']++;
+                    $results['events'][] = $event;
+                }
             } else {
                 $results['failed']++;
                 $results['events'][] = [
                     'taskName' => $task['name'],
                     'success' => false,
-                    'message' => 'Failed to add to calendar'
+                    'message' => 'Failed to add to calendar',
                 ];
             }
         }
@@ -183,12 +197,12 @@ class google_calendar_handler {
             $calendars = [];
             $calendarlist = $this->calendarservice->calendarList->listCalendarList();
 
-            foreach ($calendarlist->getItems() as $calendarItem) {
+            foreach ($calendarlist->getItems() as $calendaritem) {
                 $calendars[] = [
-                    'id' => $calendarItem->getId(),
-                    'summary' => $calendarItem->getSummary(),
-                    'description' => $calendarItem->getDescription(),
-                    'primary' => $calendarItem->getPrimary()
+                    'id' => $calendaritem->getId(),
+                    'summary' => $calendaritem->getSummary(),
+                    'description' => $calendaritem->getDescription(),
+                    'primary' => $calendaritem->getPrimary(),
                 ];
             }
 
@@ -252,7 +266,7 @@ private function create_event_from_task($task, $duedate) {
  */
 private function find_existing_task($task) {
     try {
-        // Search within a reasonable timeframe (±1 day from due date)
+        // Search within a reasonable timeframe (±1 day from due date).
         $duedate = $task['duedate'];
         $timeMin = date('c', $duedate - (24 * 3600)); // 1 day before
         $timeMax = date('c', $duedate + (24 * 3600)); // 1 day after
@@ -265,13 +279,13 @@ private function find_existing_task($task) {
             'singleEvents' => true
         ]);
 
-        // Loop through events to find a match with exact name and due time
+        // Loop through events to find a match with exact name and due time.
         foreach ($events->getItems() as $event) {
-            // Check if the event has the same title
+            // Check if the event has the same title.
             if ($event->getSummary() == '[Assignment] ' . $task['name']) {
-                // Check if end time matches due date (within 5 minutes)
+                // Check if end time matches due date (within 5 minutes).
                 $eventEndTime = strtotime($event->getEnd()->getDateTime());
-                if (abs($eventEndTime - $duedate) < 300) { // 5 minutes tolerance
+                if (abs($eventEndTime - $duedate) < 300) { // 5 minutes tolerance.
                     return $event;
                 }
             }

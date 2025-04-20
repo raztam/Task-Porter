@@ -32,56 +32,59 @@ defined('MOODLE_INTERNAL') || die();
  * This class handles fetching and formatting assignment data
  */
 class task_controller {
-    
+
     /**
      * Get all assignments for a specific course
-     * 
+     *
      * @param int $courseid Course ID to get assignments for, 0 for all courses
      * @return bool|string Array of assignments with due dates
      */
     public function get_course_assignments($courseid = 0) {
         global $DB;
-        
+
         $assignments = [];
-        
+
         // Build the query.
-        $sql = "SELECT cm.id as cmid, a.id, a.name, a.intro, a.duedate, a.allowsubmissionsfromdate, 
-                       a.course, c.fullname as coursename
+        $sql = "SELECT cm.id as cmid, a.id, a.name, a.intro, a.duedate, a.allowsubmissionsfromdate,
+                       a.course, c.fullname as coursename, cm.deletioninprogress
                 FROM {assign} a
                 JOIN {course_modules} cm ON cm.instance = a.id
                 JOIN {modules} m ON m.id = cm.module
                 JOIN {course} c ON c.id = a.course
                 WHERE m.name = 'assign'";
-        
+
         $params = array();
-        
+
         if ($courseid > 0) {
             $sql .= " AND a.course = :courseid";
             $params['courseid'] = $courseid;
         }
-        
+
         // Add sorting by due date.
         $sql .= " ORDER BY a.duedate ASC";
-        
+
         $results = $DB->get_records_sql($sql, $params);
-        
+
         foreach ($results as $result) {
             // Process results into a cleaner format.
-            $assignments[] = [
-                'id' => $result->id,
-                'cmid' => $result->cmid,
-                'name' => $result->name,
-                'description' => strip_tags($result->intro),
-                'duedate' => $result->duedate,
-                'duedateformatted' => ($result->duedate) ? userdate($result->duedate) : 'No due date',
-                'startdate' => $result->allowsubmissionsfromdate,
-                'startdateformatted' => ($result->allowsubmissionsfromdate) 
-                    ? userdate($result->allowsubmissionsfromdate) 
-                    : 'No start date',
-                'courseid' => $result->course,
-                'coursename' => $result->coursename,
-                'url' => (new \moodle_url('/mod/assign/view.php', ['id' => $result->cmid]))->out(false)
-            ];
+            // Only include assignments where deletion is not in progress.
+            if ($result->cmid && !$result->deletioninprogress) {
+                $assignments[] = [
+                    'id' => $result->id,
+                    'cmid' => $result->cmid,
+                    'name' => $result->name,
+                    'description' => strip_tags($result->intro),
+                    'duedate' => $result->duedate,
+                    'duedateformatted' => ($result->duedate) ? userdate($result->duedate) : 'No due date',
+                    'startdate' => $result->allowsubmissionsfromdate,
+                    'startdateformatted' => ($result->allowsubmissionsfromdate)
+                        ? userdate($result->allowsubmissionsfromdate)
+                        : 'No start date',
+                    'courseid' => $result->course,
+                    'coursename' => $result->coursename,
+                    'url' => (new \moodle_url('/mod/assign/view.php', ['id' => $result->cmid]))->out(false)
+                ];
+            }
         }
         return json_encode($assignments);
     }

@@ -70,6 +70,7 @@ echo $OUTPUT->heading('Add Tasks to Google Calendar');
 $templatedata = [
     'success' => $results['success'],
     'added' => $results['added'] ?? 0,
+    'skipped' => $results['skipped'] ?? 0,
     'failed' => $results['failed'] ?? 0,
     'events' => $results['events'] ?? [],
     'message' => $results['message'] ?? '',
