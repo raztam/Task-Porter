@@ -22,27 +22,30 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_taskporter\google\google_auth_manager;
+use local_taskporter\constants;
+use local_taskporter\redirect_manager;
+
 require_once('../../config.php');
 require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
+require_once($CFG->dirroot . '/local/taskporter/classes/redirect_manager.php');
+require_once($CFG->dirroot . '/local/taskporter/classes/constants.php');
 
 $courseid = required_param('courseid', PARAM_INT);
-// Optional parameter to determine where to redirect after authentication
-$returnto = optional_param('returnto', 'default', PARAM_ALPHA);
+// Optional parameter to determine where to redirect after authentication.
+$returnto = optional_param('returnto', constants::RETURN_DEFAULT, PARAM_ALPHA);
 
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login();
 require_capability('local/taskporter:view', $context);
 
-// Create instance of the Google Auth Manager.
-$authmanager = new \local_taskporter\google\google_auth_manager();
+$authmanager = new google_auth_manager();
 
 if ($authmanager->is_authenticated()) {
     // If already authenticated, redirect based on the returnto parameter.
-    if ($returnto === 'calendar') {
-        redirect(new moodle_url('/local/taskporter/add_to_calendar.php', array('courseid' => $courseid)));
-    }
+    redirect_manager::redirect_to_destination($courseid, $returnto);
 }
 
 $authmanager->get_redirect_uri();

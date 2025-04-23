@@ -25,21 +25,22 @@
 use local_taskporter\controller\task_controller;
 use local_taskporter\google\google_calendar_handler;
 use local_taskporter\google\google_auth_manager;
+use local_taskporter\constants;
 
 require_once('../../config.php');
 require_once($CFG->dirroot . '/local/taskporter/classes/task_controller.php');
 require_once($CFG->dirroot . '/local/taskporter/classes/google_calendar_handler.php');
 require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
+require_once($CFG->dirroot . '/local/taskporter/classes/constants.php');
 
-// Course ID parameter.
 $courseid = required_param('courseid', PARAM_INT);
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login();
 require_capability('local/taskporter:view', $context);
 
-$PAGE->set_url(new moodle_url('/local/taskporter/add_to_calendar.php', array('courseid' => $courseid)));
+$PAGE->set_url(new moodle_url('/local/taskporter/add_to_calendar.php', ['courseid' => $courseid]));
 $PAGE->set_context($context);
 $PAGE->set_course($course);
 $PAGE->set_title('Add Tasks to Calendar');
@@ -49,10 +50,16 @@ $PAGE->set_heading(format_string($course->fullname));
 $authmanager = new google_auth_manager();
 if (!$authmanager->is_authenticated()) {
     redirect(
-        new moodle_url('/local/taskporter/google_auth.php', ['courseid' => $courseid, 'returnto' => 'calendar']),
-        'Redirecting to Google authentication...'
+        new moodle_url(constants::URL_GOOGLE_AUTH, [
+            'courseid' => $courseid,
+            'returnto' => constants::RETURN_GOOGLE_CALENDAR,
+        ]),
     );
 }
+
+// Get authentication status and email for the template.
+$isauthenticated = $authmanager->is_authenticated();
+$useremail = $isauthenticated ? $authmanager->get_user_email() : "raz@raz.com";
 
 // Create calendar handler and get tasks from controller.
 $calendarhandler = new google_calendar_handler();
@@ -66,6 +73,17 @@ $results = $calendarhandler->add_all_tasks_to_calendar($assignments);
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Add Tasks to Google Calendar');
 
+// Prepare data for Google account status template.
+$accountdata = [
+    'is_authenticated' => $isauthenticated,
+    'google_email' => $useremail,
+    'login_url' => (new moodle_url('/local/taskporter/google_auth.php', ['courseid' => $courseid, 'returnto' => 'calendar']))->out(false),
+    'logout_url' => (new moodle_url('/local/taskporter/google_logout.php', ['courseid' => $courseid, 'returnto' => 'calendar']))->out(false),
+];
+
+// Render the Google account status partial.
+echo $OUTPUT->render_from_template('local_taskporter/google_account_status', $accountdata);
+
 // Display results.
 $templatedata = [
     'success' => $results['success'],
@@ -74,7 +92,7 @@ $templatedata = [
     'failed' => $results['failed'] ?? 0,
     'events' => $results['events'] ?? [],
     'message' => $results['message'] ?? '',
-    'courseUrl' => (new moodle_url('/local/taskporter/index.php', ['courseid' => $courseid]))->out(false)
+    'courseUrl' => (new moodle_url('/local/taskporter/index.php', ['courseid' => $courseid]))->out(false),
 ];
 
 echo $OUTPUT->render_from_template('local_taskporter/calendar_results', $templatedata);

@@ -59,7 +59,7 @@ class google_auth_manager {
         // Create Google client.
         $this->client = new \Google_Client();
         $this->client->setApplicationName('Moodle TaskPorter');
-        $this->client->setScopes([\Google_Service_Calendar::CALENDAR]);
+        $this->client->setScopes([\Google_Service_Calendar::CALENDAR, 'https://www.googleapis.com/auth/userinfo.email']);
 
         // Get client credentials from plugin settings.
         $clientid = $googleapiconfig['google_client_id'];
@@ -68,13 +68,15 @@ class google_auth_manager {
 
         $this->client->setClientId($clientid);
         $this->client->setClientSecret($clientsecret);
-        $this->client->setRedirectUri( $redirecturi);
+        $this->client->setRedirectUri($redirecturi);
         $this->client->setAccessType('offline');  // We need refresh token.
         $this->client->setPrompt('consent');      // Force to approve the access each time.
 
         // Try to load saved token.
         $token = $this->get_stored_token();
         if ($token) {
+            // The Google API client expects either a JSON string or an array.
+            // We're already getting an array from get_stored_token(), so we can use it directly.
             $this->client->setAccessToken($token);
 
             // If token is expired, try to refresh it.
@@ -177,11 +179,11 @@ class google_auth_manager {
 
             if ($record) {
                 // When refreshing tokens, Google typically doesn't send a new refresh token
-                // We need to preserve the existing one if a new one isn't included
+                // We need to preserve the existing one if a new one isn't included.
                 if (empty($token['refresh_token'])) {
-                    $existingToken = json_decode($record->token_data, true);
-                    if (!empty($existingToken['refresh_token'])) {
-                        $token['refresh_token'] = $existingToken['refresh_token'];
+                    $existingtoken = json_decode($record->token_data, true);
+                    if (!empty($existingtoken['refresh_token'])) {
+                        $token['refresh_token'] = $existingtoken['refresh_token'];
                     }
                 }
 
@@ -189,7 +191,7 @@ class google_auth_manager {
                 $record->timemodified = time();
                 return $DB->update_record('local_taskporter_user_tokens', $record);
             } else {
-                // First time authentication - store everything
+                // First time authentication - store everything.
                 $record = new \stdClass();
                 $record->userid = $this->userid;
                 $record->token_data = json_encode($token);
@@ -262,14 +264,42 @@ class google_auth_manager {
         return $this->client->getRedirectUri();
     }
 
-/**
- * Handle OAuth callback and exchange code for access token.
- *
- * @param string $code Authorization code from Google
- * @return bool True if successful
- */
-public function handle_callback($code) {
-    return $this->store_token_from_code($code);
-}
+    /**
+     * Handle OAuth callback and exchange code for access token.
+     *
+     * @param string $code Authorization code from Google
+     * @return bool True if successful
+     */
+    public function handle_callback($code) {
+        return $this->store_token_from_code($code);
+    }
 
+    /**
+     * Get the user's Google email address from userinfo endpoint
+     *
+     * @return string|null User email or null if not available
+     */
+    public function get_user_email() {
+        // Only proceed if authenticated.
+        if (!$this->is_authenticated()) {
+            return null;
+        }
+
+        try {
+            require_once(dirname(dirname(__FILE__)) . '/vendor/autoload.php');
+            $oauth2 = new \Google_Service_Oauth2($this->client);
+            $userinfo = $oauth2->userinfo->get();
+
+            if ($userinfo && $userinfo->email) {
+                return $userinfo->email;
+            } else {
+                debugging('Userinfo endpoint returned no email', DEBUG_DEVELOPER);
+                return null;
+            }
+        } catch (\Exception $e) {
+            debugging('Error getting email from userinfo endpoint: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        }
+
+        return null;
+    }
 }
