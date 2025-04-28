@@ -39,7 +39,7 @@ class redirect_manager {
      * @param int $courseid The course ID
      * @param string $returnto The return destination
      * @param string|null $message Optional message to display
-     * @param string|null $messagetype Optional message type
+     * @param string|null $messagetype Optional message type(success/error/warning)
      * @return void
      */
     public static function redirect_to_destination($courseid, $returnto, $message = null, $messagetype = null) {

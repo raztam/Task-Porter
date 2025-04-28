@@ -59,7 +59,7 @@ if (!$authmanager->is_authenticated()) {
 
 // Get authentication status and email for the template.
 $isauthenticated = $authmanager->is_authenticated();
-$useremail = $isauthenticated ? $authmanager->get_user_email() : "raz@raz.com";
+$useremail = $authmanager->get_user_email();
 
 // Create calendar handler and get tasks from controller.
 $calendarhandler = new google_calendar_handler();

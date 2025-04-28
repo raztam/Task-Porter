@@ -111,8 +111,8 @@ class google_auth_manager {
             'provider' => 'google',
         ]);
 
-        if ($record && !empty($record->token_data)) {
-            return json_decode($record->token_data, true);
+        if ($record && !empty($record->tokendata)) {
+            return json_decode($record->tokendata, true);
         }
 
         return null;
@@ -181,20 +181,20 @@ class google_auth_manager {
                 // When refreshing tokens, Google typically doesn't send a new refresh token
                 // We need to preserve the existing one if a new one isn't included.
                 if (empty($token['refresh_token'])) {
-                    $existingtoken = json_decode($record->token_data, true);
+                    $existingtoken = json_decode($record->tokendata, true);
                     if (!empty($existingtoken['refresh_token'])) {
                         $token['refresh_token'] = $existingtoken['refresh_token'];
                     }
                 }
 
-                $record->token_data = json_encode($token);
+                $record->tokendata = json_encode($token);
                 $record->timemodified = time();
                 return $DB->update_record('local_taskporter_user_tokens', $record);
             } else {
                 // First time authentication - store everything.
                 $record = new \stdClass();
                 $record->userid = $this->userid;
-                $record->token_data = json_encode($token);
+                $record->tokendata = json_encode($token);
                 $record->provider = 'google';
                 $record->timecreated = time();
                 $record->timemodified = time();
@@ -256,10 +256,10 @@ class google_auth_manager {
     }
 
     /**
-    * Get the redirect URI that's configured for OAuth
-    *
-    * @return string The configured redirect URI
-    */
+     * Get the redirect URI that's configured for OAuth
+     *
+     * @return string The configured redirect URI
+     */
     public function get_redirect_uri() {
         return $this->client->getRedirectUri();
     }
