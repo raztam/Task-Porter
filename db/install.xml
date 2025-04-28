@@ -8,7 +8,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User ID"/>
-        <FIELD NAME="token_data" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Complete OAuth token data as JSON"/>
+        <FIELD NAME="tokendata" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Complete OAuth token data as JSON"/>
         <FIELD NAME="provider" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth provider name (e.g., microsoft, google)"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when the token was created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when the token was last modified"/>
