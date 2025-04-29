@@ -1,0 +1,12 @@
+
+
+
+
+
+<div class="taskporter-subscription-toggle">
+    <a href="{{toggle_subscription_url}}" class="btn {{#is_subscribed}}btn-outline-secondary{{/is_subscribed}}{{^is_subscribed}}btn-outline-info{{/is_subscribed}}">
+        <i class="fa fa-{{#is_subscribed}}bell-slash{{/is_subscribed}}{{^is_subscribed}}bell{{/is_subscribed}} mr-2"></i>
+        {{#is_subscribed}}Unsubscribe{{/is_subscribed}}
+        {{^is_subscribed}}Subscribe{{/is_subscribed}}
+    </a>
+</div>

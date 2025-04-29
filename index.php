@@ -16,6 +16,7 @@
 
 use local_taskporter\controller\task_controller;
 use local_taskporter\google\google_auth_manager;
+use local_taskporter\subscription_manager;
 use local_taskporter\constants;
 
 require_once('../../config.php');
@@ -41,6 +42,9 @@ $authmanager = new google_auth_manager();
 $isauthenticated = $authmanager->is_authenticated();
 $useremail = $authmanager->get_user_email();
 
+// Check if the user is subscribed to the course.
+$issubscribed = subscription_manager::is_subscribed($USER->id, $courseid);
+
 $taskcontroller = new task_controller();
 $assignmentsjson = $taskcontroller->get_course_assignments($courseid);
 // Pass true as the second parameter to get arrays instead of objects.
@@ -51,6 +55,9 @@ $templatedata = [
     'has_assignments' => !empty($assignments),
     'assignments' => $assignments,
     'calendar_url' => (new moodle_url(constants::URL_GOOGLE_CALENDAR_PAGE, ['courseid' => $courseid]))->out(false),
+     // Subscription data.
+     'is_subscribed' => $issubscribed,
+     'toggle_subscription_url' => (new moodle_url(constants::URL_TOGGLE_SUBSCRIPTION, ['courseid' => $courseid]))->out(false),
     // Google account status data.
     'is_authenticated' => $isauthenticated,
     'google_email' => $useremail,

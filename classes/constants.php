@@ -45,8 +45,14 @@ class constants {
     /** @var string URL for Google OAuth callback */
     const URL_GOOGLE_OAUTH_CALLBACK = '/local/taskporter/google_oauth_callback.php';
 
+    /** @var string URL for toggling course subscription */
+    const URL_TOGGLE_SUBSCRIPTION = '/local/taskporter/toggle_subscription.php';
+
     /** @var string Default redirect destination parameter value */
     const RETURN_DEFAULT = 'default';
+
+    /** @var string Subscribe return destination parameter value */
+    const RETURN_SUBSCRIPTION = 'subscription';
 
     /** @var string Calendar redirect destination parameter value */
     const RETURN_GOOGLE_CALENDAR = 'calendar';

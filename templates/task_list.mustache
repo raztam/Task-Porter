@@ -1,6 +1,11 @@
 <div class="taskporter-container">
     {{#has_assignments}}
-        <h3>Assignments in this course:</h3>
+        <div class="mb-3">
+            {{> local_taskporter/subscription_toggle}}
+        </div>
+
+        <h3 class="mb-2">Assignments in this course:</h3>
+
         <ul class="assignment-list">
             {{#assignments}}
                 <li>

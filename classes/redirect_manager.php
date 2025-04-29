@@ -45,6 +45,7 @@ class redirect_manager {
     public static function redirect_to_destination($courseid, $returnto, $message = null, $messagetype = null) {
         $url = match($returnto) {
             constants::RETURN_GOOGLE_CALENDAR => new \moodle_url(constants::URL_GOOGLE_CALENDAR_PAGE, ['courseid' => $courseid]),
+            constants::RETURN_SUBSCRIPTION => new \moodle_url(constants::URL_TOGGLE_SUBSCRIPTION, ['courseid' => $courseid]),
             constants::RETURN_DEFAULT => new \moodle_url(constants::URL_MAIN_PAGE, ['courseid' => $courseid]),
             default => new \moodle_url(constants::URL_MAIN_PAGE, ['courseid' => $courseid]),
         };
