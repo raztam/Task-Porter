@@ -24,8 +24,6 @@
 
 namespace local_taskporter\google;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class responsible for handling Google Calendar API interactions
  */
@@ -109,7 +107,6 @@ class google_calendar_handler {
             // Insert the event.
             $createdevent = $this->calendarservice->events->insert($this->calendarid, $event);
 
-            echo 'Event created: ' . print_r( $createdevent, true) . "\n";
             // Return the created event.
             return [
                 'id' => $createdevent->getId(),
@@ -119,7 +116,7 @@ class google_calendar_handler {
             ];
 
         } catch (\Exception $e) {
-            debugging('Error adding task to calendar: ' . $e->getMessage(),DEBUG_DEVELOPER);
+            debugging('Error adding task to calendar: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return false;
         }
     }
@@ -222,80 +219,80 @@ class google_calendar_handler {
         $this->calendarid = $calendarid;
     }
 
-/**
- * Creates a Google Calendar event from a Moodle task
- *
- * @param array $task Task data from task_controller
- * @param int $duedate The due date timestamp for the task
- * @return \Google_Service_Calendar_Event The created event object
- */
-private function create_event_from_task($task, $duedate) {
-    // Random color ID between 1 and 11 (Google Calendar color IDs).
-    $colorid = rand(1, 11);
+    /**
+     * Creates a Google Calendar event from a Moodle task
+     *
+     * @param array $task Task data from task_controller
+     * @param int $duedate The due date timestamp for the task
+     * @return \Google_Service_Calendar_Event The created event object
+     */
+    private function create_event_from_task($task, $duedate) {
+        // Random color ID between 1 and 11 (Google Calendar color IDs).
+        $colorid = rand(1, 11);
 
-    return new \Google_Service_Calendar_Event([
+        return new \Google_Service_Calendar_Event([
         'summary' => '[Assignment] ' . $task['name'],
         'description' => 'Course: ' . $task['coursename'] . "\n\n" .
                          $task['description'] . "\n\n" .
                          "View in Moodle: " . $task['url'],
         'start' => [
             'dateTime' => date('c', $duedate - (3 * 3600)), // 3 hours before due
-            'timeZone' => date_default_timezone_get()
+            'timeZone' => date_default_timezone_get(),
         ],
         'end' => [
             'dateTime' => date('c', $duedate),
-            'timeZone' => date_default_timezone_get()
+            'timeZone' => date_default_timezone_get(),
         ],
         'reminders' => [
             'useDefault' => false,
             'overrides' => [
                 ['method' => 'popup', 'minutes' => 1440], // 24 hours before
-                ['method' => 'popup', 'minutes' => 60]     // 1 hour before
-            ]
+                ['method' => 'popup', 'minutes' => 60],     // 1 hour before
+            ],
         ],
         'colorId' => (string)$colorid, // Random color for events.
-    ]);
-}
-
-
-/**
- * Find if a task already exists in the calendar
- *
- * @param array $task Task data from task_controller
- * @return \Google_Service_Calendar_Event|null The existing event or null if not found
- */
-private function find_existing_task($task) {
-    try {
-        // Search within a reasonable timeframe (±1 day from due date).
-        $duedate = $task['duedate'];
-        $timeMin = date('c', $duedate - (24 * 3600)); // 1 day before
-        $timeMax = date('c', $duedate + (24 * 3600)); // 1 day after
-
-        // Search for events with the same name
-        $events = $this->calendarservice->events->listEvents($this->calendarid, [
-            'timeMin' => $timeMin,
-            'timeMax' => $timeMax,
-            'q' => $task['name'],
-            'singleEvents' => true
         ]);
+    }
 
-        // Loop through events to find a match with exact name and due time.
-        foreach ($events->getItems() as $event) {
-            // Check if the event has the same title.
-            if ($event->getSummary() == '[Assignment] ' . $task['name']) {
-                // Check if end time matches due date (within 5 minutes).
-                $eventEndTime = strtotime($event->getEnd()->getDateTime());
-                if (abs($eventEndTime - $duedate) < 300) { // 5 minutes tolerance.
-                    return $event;
+
+    /**
+     * Find if a task already exists in the calendar
+     *
+     * @param array $task Task data from task_controller
+     * @return \Google_Service_Calendar_Event|null The existing event or null if not found
+     */
+    private function find_existing_task($task) {
+        try {
+            // Search within a reasonable timeframe (±1 day from due date).
+            $duedate = $task['duedate'];
+            $timemin = date('c', $duedate - (24 * 3600)); // 1 day before
+            $timemax = date('c', $duedate + (24 * 3600)); // 1 day after
+
+            // Search for events with the same name
+            $events = $this->calendarservice->events->listEvents($this->calendarid, [
+            'timeMin' => $timemin,
+            'timeMax' => $timemax,
+            'q' => $task['name'],
+            'singleEvents' => true,
+            ]);
+
+            // Loop through events to find a match with exact name and due time.
+            foreach ($events->getItems() as $event) {
+                // Check if the event has the same title.
+                if ($event->getSummary() == '[Assignment] ' . $task['name']) {
+                    // Check if end time matches due date (within 5 minutes).
+                    $eventendtime = strtotime($event->getEnd()->getDateTime());
+                    if (abs($eventendtime - $duedate) < 300) { // 5 minutes tolerance.
+                        return $event;
+                    }
                 }
             }
-        }
 
-        return null;
-    } catch (\Exception $e) {
-        debugging('Error searching for existing events: ' . $e->getMessage(), DEBUG_DEVELOPER);
-        return null;
+            return null;
+        } catch (\Exception $e) {
+            debugging('Error searching for existing events: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return null;
+        }
     }
-}
 
 }

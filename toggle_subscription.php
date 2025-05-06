@@ -27,9 +27,7 @@ use local_taskporter\google\google_auth_manager;
 use local_taskporter\constants;
 
 require_once('../../config.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/subscription_manager.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/constants.php');
+
 
 $courseid = required_param('courseid', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);

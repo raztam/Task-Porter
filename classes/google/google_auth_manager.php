@@ -25,8 +25,6 @@
 namespace local_taskporter\google;
 
 defined('MOODLE_INTERNAL') || die();
-require_once(dirname(dirname(__FILE__)) . '/config.php');
-
 
 /**
  * Class responsible for managing Google API OAuth credentials
@@ -54,6 +52,8 @@ class google_auth_manager {
      */
     protected function initialize_client() {
         global $CFG, $googleapiconfig;
+        require_once($CFG->dirroot . '/local/taskporter/config.php');
+        require_login();
         require_once($CFG->dirroot . '/local/taskporter/vendor/autoload.php');
 
         // Create Google client.
@@ -280,13 +280,14 @@ class google_auth_manager {
      * @return string|null User email or null if not available
      */
     public function get_user_email() {
+        global $CFG;
         // Only proceed if authenticated.
         if (!$this->is_authenticated()) {
             return null;
         }
 
         try {
-            require_once(dirname(dirname(__FILE__)) . '/vendor/autoload.php');
+            require_once($CFG->dirroot . '/local/taskporter/vendor/autoload.php');
             $oauth2 = new \Google_Service_Oauth2($this->client);
             $userinfo = $oauth2->userinfo->get();
 

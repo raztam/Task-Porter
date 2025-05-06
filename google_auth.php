@@ -27,9 +27,7 @@ use local_taskporter\constants;
 use local_taskporter\redirect_manager;
 
 require_once('../../config.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/redirect_manager.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/constants.php');
+
 
 $courseid = required_param('courseid', PARAM_INT);
 // Optional parameter to determine where to redirect after authentication.

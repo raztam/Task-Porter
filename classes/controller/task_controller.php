@@ -53,7 +53,7 @@ class task_controller {
                 JOIN {course} c ON c.id = a.course
                 WHERE m.name = 'assign'";
 
-        $params = array();
+        $params = [];
 
         if ($courseid > 0) {
             $sql .= " AND a.course = :courseid";
@@ -82,10 +82,63 @@ class task_controller {
                         : 'No start date',
                     'courseid' => $result->course,
                     'coursename' => $result->coursename,
-                    'url' => (new \moodle_url('/mod/assign/view.php', ['id' => $result->cmid]))->out(false)
+                    'url' => (new \moodle_url('/mod/assign/view.php', ['id' => $result->cmid]))->out(false),
                 ];
             }
         }
         return json_encode($assignments);
+    }
+
+     /**
+      * Get a single assignment by its instance ID and course module ID
+      *
+      * @param int $courseid Course ID
+      * @param int $instanceid Assignment instance ID
+      * @param int $moduleid Course module ID
+      * @return array|null Assignment data array or null if not found
+      */
+    public function get_assignment_by_id($courseid, $instanceid, $moduleid) {
+        global $DB;
+
+        // Build the query for a specific assignment.
+        $sql = "SELECT cm.id as cmid, a.id, a.name, a.intro, a.duedate, a.allowsubmissionsfromdate,
+                       a.course, c.fullname as coursename, cm.deletioninprogress
+                FROM {assign} a
+                JOIN {course_modules} cm ON cm.instance = a.id
+                JOIN {modules} m ON m.id = cm.module
+                JOIN {course} c ON c.id = a.course
+                WHERE m.name = 'assign'
+                AND a.id = :instanceid
+                AND cm.module = :moduleid
+                AND a.course = :courseid";
+
+        $params = [
+            'instanceid' => $instanceid,
+            'moduleid' => $moduleid,
+            'courseid' => $courseid,
+        ];
+
+        $result = $DB->get_record_sql($sql, $params);
+
+        if (!$result || $result->deletioninprogress) {
+            return null;
+        }
+
+        // Format the assignment data.
+        return [
+            'id' => $result->id,
+            'cmid' => $result->cmid,
+            'name' => $result->name,
+            'description' => strip_tags($result->intro),
+            'duedate' => $result->duedate,
+            'duedateformatted' => ($result->duedate) ? userdate($result->duedate) : 'No due date',
+            'startdate' => $result->allowsubmissionsfromdate,
+            'startdateformatted' => ($result->allowsubmissionsfromdate)
+                ? userdate($result->allowsubmissionsfromdate)
+                : 'No start date',
+            'courseid' => $result->course,
+            'coursename' => $result->coursename,
+            'url' => (new \moodle_url('/mod/assign/view.php', ['id' => $result->cmid]))->out(false),
+        ];
     }
 }

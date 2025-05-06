@@ -14,18 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Version information for the local_taskporter plugin.
- *
- * @package   local_taskporter
- * @copyright 2025, Your Name <your.email@example.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+require_once(__DIR__ . '/../../config.php');
+require_once($CFG->libdir . '/eventslib.php');
 
-defined('MOODLE_INTERNAL') || die();
+use core\event\manager;
 
-$plugin->version   = 2024031807;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022112800;        // Requires this Moodle version.
-$plugin->component = 'local_taskporter'; // Full name of the plugin.
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.0.0';
+echo "<pre>";
+
+$reflection = new ReflectionClass('core\\event\\manager');
+$method = $reflection->getMethod('load_observers');
+$method->setAccessible(true);
+$observers = $method->invoke(null);
+
+foreach ($observers as $eventname => $handlers) {
+    if (str_contains($eventname, 'course_module_created')) {
+        echo "Event: $eventname\n";
+        print_r($handlers);
+    }
+}
+
+echo "</pre>";
