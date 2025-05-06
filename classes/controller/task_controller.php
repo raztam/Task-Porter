@@ -109,7 +109,7 @@ class task_controller {
                 JOIN {course} c ON c.id = a.course
                 WHERE m.name = 'assign'
                 AND a.id = :instanceid
-                AND cm.id = :moduleid
+                AND cm.module = :moduleid
                 AND a.course = :courseid";
 
         $params = [

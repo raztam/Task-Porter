@@ -59,8 +59,12 @@ class assignment_observer {
 
         $data = $event->get_data();
         $courseid = $data['courseid'];
-        $instanceid = $data['objectid'];
-        $moduleid = $data['contextinstanceid'];
+
+        $cmid = $data['objectid']; // Course module ID.
+        $cm = get_coursemodule_from_id('assign', $cmid, $courseid);
+        if (!$cm) {
+            return false; // Course module not found.
+        }
 
         // Check if this course has any subscribers.
         $subscribers = $DB->get_records('local_taskporter_subscriptions', ['courseid' => $courseid]);
@@ -72,8 +76,8 @@ class assignment_observer {
         $task = new push_assignment_to_calendar_task();
         $task->set_custom_data([
             'courseid' => $courseid,
-            'moduleid' => $moduleid,
-            'instanceid' => $instanceid,
+            'moduleid' => $cm->module,
+            'instanceid' => $cm->instance,
             'eventtime' => time(),
         ]);
 

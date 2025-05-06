@@ -99,7 +99,7 @@ class push_assignment_to_calendar_task extends \core\task\adhoc_task {
 
         try {
             // Initialize calendar handler with the user's auth.
-            $calendarhandler = new google_calendar_handler($authmanager->get_client());
+            $calendarhandler = new google_calendar_handler();
 
             // Add task to calendar.
             $result = $calendarhandler->add_task_to_calendar($task);
