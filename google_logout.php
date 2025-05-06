@@ -28,9 +28,6 @@
  use local_taskporter\constants;
 
 require_once('../../config.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/google_auth_manager.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/redirect_manager.php');
-require_once($CFG->dirroot . '/local/taskporter/classes/constants.php');
 
 // Course ID is required to redirect back.
 $courseid = required_param('courseid', PARAM_INT);
