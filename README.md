@@ -14,7 +14,6 @@ Task-Porter is a Moodle local plugin that automatically syncs newly created assi
 
 - Moodle 4.1 or higher (tested on 4.4)
 - Google account for calendar integration
-- OAuth 2 service configured in Moodle
 - Composer installed
 
 ## Installation
@@ -41,17 +40,11 @@ Task-Porter is a Moodle local plugin that automatically syncs newly created assi
    - Add your Moodle site domain to the authorized redirect URIs
    - Note your Client ID and Client Secret
 
-3. Create or edit the `config.php` file in the plugin directory:
+3. Configure the plugin in Moodle:
 
-   ```php
-   <?php
-   defined('MOODLE_INTERNAL') || die();
-
-   $googleapiconfig = [
-       'google_client_id' => 'YOUR_CLIENT_ID_HERE',
-       'google_client_secret' => 'YOUR_CLIENT_SECRET_HERE',
-   ];
-   ```
+   - Go to Site administration > Plugins > Local plugins > Task Porter
+   - Enter your Google API Client ID and Client Secret in the settings page
+   - Save changes
 
 4. Set the correct permissions:
 

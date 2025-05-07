@@ -29,3 +29,26 @@ $string['googleaccount'] = 'Google Account';
 $string['subscription_success'] = 'Successfully subscribed for course updates.';
 $string['unsubscription_success'] = 'Successfully unsubscribed from course updates.';
 $string['subscription_failed'] = 'Failed to update subscription.';
+
+// Admin settings strings
+$string['google_client_id'] = 'Google Client ID';
+$string['google_client_id_desc'] = 'The Client ID from your Google API Console project.';
+$string['google_client_secret'] = 'Google Client Secret';
+$string['google_client_secret_desc'] = 'The Client Secret from your Google API Console project.';
+$string['setup_instructions'] = 'Google API Setup Instructions';
+$string['setup_instructions_desc'] = '
+<ol>
+    <li>Go to the <a href="https://console.developers.google.com/" target="_blank">Google API Console</a></li>
+    <li>Create a new project or select an existing one</li>
+    <li>Enable the Google Calendar API</li>
+    <li>Go to "Credentials" and create an OAuth 2.0 Client ID</li>
+    <li>Set the application type to "Web application"</li>
+    <li>Add the following Authorized redirect URI: <strong>{$a}</strong></li>
+    <li>Under "OAuth consent screen", add the following scopes:
+        <ul>
+            <li><code>https://www.googleapis.com/auth/calendar</code></li>
+            <li><code>https://www.googleapis.com/auth/userinfo.email</code></li>
+        </ul>
+    </li>
+    <li>Copy the resulting Client ID and Client Secret into the fields above</li>
+</ol>';

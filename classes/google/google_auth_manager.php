@@ -24,8 +24,6 @@
 
 namespace local_taskporter\google;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class responsible for managing Google API OAuth credentials
  */
@@ -62,8 +60,8 @@ class google_auth_manager {
         $this->client->setScopes([\Google_Service_Calendar::CALENDAR, 'https://www.googleapis.com/auth/userinfo.email']);
 
         // Get client credentials from plugin settings.
-        $clientid = $googleapiconfig['google_client_id'];
-        $clientsecret = $googleapiconfig['google_client_secret'];
+        $clientid = get_config('local_taskporter', 'google_client_id');
+        $clientsecret = get_config('local_taskporter', 'google_client_secret');
         $redirecturi = (new \moodle_url('/local/taskporter/google_oauth_callback.php'))->out(false);
 
         $this->client->setClientId($clientid);
